@@ -7,7 +7,16 @@ spark = SparkSession.builder.appName("EngagementByAgeGroup").getOrCreate()
 posts_df = spark.read.option("header", True).csv("input/posts.csv", inferSchema=True)
 users_df = spark.read.option("header", True).csv("input/users.csv", inferSchema=True)
 
-# TODO: Implement the task here
+# Join datasets on UserID
+joined_df = posts_df.join(users_df, on="UserID")
+
+# Group by AgeGroup and calculate average likes and retweets
+engagement_df = joined_df.groupBy("AgeGroup") \
+    .agg(
+        avg("Likes").alias("Avg_Likes"),
+        avg("Retweets").alias("Avg_Retweets")
+    ) \
+    .orderBy(col("Avg_Likes").desc())
 
 
 # Save result
